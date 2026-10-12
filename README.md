@@ -143,10 +143,3 @@ notifier := gonotify.New(gonotify.Config{
 ## 📄 License
 
 MIT License © 2026 [IamFreak10](https://github.com/IamFreak10)
-
----
-
-## 👥 Contributors
-
-- **[Mahfuj Abdulla (@IamFreak10)](https://github.com/IamFreak10)** — Lead Developer & Maintainer
-- **Antigravity AI (Google DeepMind)** — Co-designer & Architecture Pair Programmer
