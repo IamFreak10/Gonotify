@@ -3,8 +3,10 @@ package gonotify
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -103,6 +105,43 @@ func (e *Engine) Handler() http.HandlerFunc {
 
 		go client.writePump(e.config)
 		go client.readPump(e.config)
+	}
+}
+
+// PublishHandler provides an HTTP REST endpoint (POST /publish or POST /api/notify)
+// so that any external backend (Node.js, Python, PHP, etc.) can send notifications via HTTP POST
+func (e *Engine) PublishHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var msg Message
+		if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
+			http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+			return
+		}
+
+		if msg.Timestamp == 0 {
+			msg.Timestamp = time.Now().Unix()
+		}
+
+		var err error
+		if msg.Topic != "" {
+			err = e.Publish(msg.Topic, msg)
+		} else {
+			err = e.Broadcast(msg)
+		}
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status":"success"}`))
 	}
 }
 
