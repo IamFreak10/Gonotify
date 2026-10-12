@@ -1,4 +1,4 @@
-module github.com/IamFreak10/gonotify
+module github.com/IamFreak10/Gonotify
 
 go 1.21
 
